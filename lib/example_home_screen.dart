@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'widgets/navigation_button.dart';
+import 'core/widgets/navigation_button.dart';
 import 'screens/1_basic_provider/basic_provider_screen.dart';
 import 'screens/2_state_notifier/state_notifier_screen.dart';
 import 'screens/3_async_notifier/async_notifier_screen.dart';
@@ -13,8 +13,8 @@ import 'screens/10_family_provider_annotated/family_provider_annotated_screen.da
 import 'screens/11_keep_alive_provider_annotated/keep_alive_provider_annotated_screen.dart';
 import 'screens/12_timed_state_provider/timed_state_provider_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class ExampleHomeScreen extends StatelessWidget {
+  const ExampleHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
