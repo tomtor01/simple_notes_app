@@ -1,19 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/note_repository.dart';
+import '../data/note_repository_hive.dart';
 import '../models/note.dart';
 
-final notesRepositoryProvider = Provider((ref) => NotesRepository());
+final notesRepositoryProvider = Provider((ref) => NotesRepositoryHive());
 
 final notesProvider = AsyncNotifierProvider<NotesNotifier, List<Note>>(() {
   return NotesNotifier();
 });
 
 class NotesNotifier extends AsyncNotifier<List<Note>> {
-  late final NotesRepository _repository;
+  late final NotesRepositoryHive _repository = ref.read(notesRepositoryProvider);
 
   @override
   Future<List<Note>> build() async {
-    _repository = ref.read(notesRepositoryProvider);
     return _repository.fetchNotes();
   }
 
@@ -34,7 +33,7 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     state = await AsyncValue.guard(() => _repository.fetchNotes());
   }
 
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     state = const AsyncLoading();
     await _repository.deleteNote(id);
     state = await AsyncValue.guard(() => _repository.fetchNotes());

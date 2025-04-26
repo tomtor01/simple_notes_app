@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/note_card.dart';
-import '../../note/data/note_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../note/models/note.dart';
+import '../../note/presentation/add_note_page.dart';
 import '../../note/presentation/note_page.dart';
 import '../../note/providers/note_notifier.dart';
 
@@ -33,7 +32,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Implement note creation logic
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddNotePage()),
+          );
         },
         icon: const Icon(Icons.add),
         label: const Text('Nowa notatka'),
@@ -42,7 +44,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildBody(BuildContext context, WindowSizeClass windowSizeClass, AsyncValue<List<Note>> notesState) {
+  Widget _buildBody(
+    BuildContext context,
+    WindowSizeClass windowSizeClass,
+    AsyncValue<List<Note>> notesState,
+  ) {
     return notesState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) => Center(child: Text('Błąd: $error')),
@@ -53,7 +59,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         return Padding(
           padding: ResponsiveLayout.getMarginForWindowSize(windowSizeClass),
           child: LayoutBuilder(
-            builder: (context, constraints) => _buildGridLayout(notes, windowSizeClass),
+            builder:
+                (context, constraints) =>
+                    _buildGridLayout(notes, windowSizeClass),
           ),
         );
       },
@@ -61,10 +69,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildGridLayout(List<Note> notes, WindowSizeClass windowSizeClass) {
-    int columns = windowSizeClass == WindowSizeClass.compact ? 1
-        : windowSizeClass == WindowSizeClass.medium ? 2
-        : windowSizeClass == WindowSizeClass.large ? 3
-        : 4;
+    int columns =
+        windowSizeClass == WindowSizeClass.compact
+            ? 1
+            : windowSizeClass == WindowSizeClass.medium
+            ? 2
+            : windowSizeClass == WindowSizeClass.large
+            ? 3
+            : 4;
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

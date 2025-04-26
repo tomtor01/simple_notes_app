@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../data/note_repository.dart';
+import '../data/note_repository_hive.dart';
 
 part 'note_state.freezed.dart';
 
