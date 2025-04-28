@@ -1,11 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../data/note_repository_hive.dart';
 
 part 'note_state.freezed.dart';
 
-// Stan quizu - klasa domenowa implementująca immutability
+// Stan notatki - klasa domenowa implementująca immutability
 @freezed
-class NoteState with _$NoteState {
+abstract class NoteState with _$NoteState {
   const NoteState._();
 
   const factory NoteState({
@@ -15,24 +14,4 @@ class NoteState with _$NoteState {
     required DateTime noteCreatedAt,
     required DateTime noteModifiedAt,
   }) = _NoteState;
-
-  @override
-  // TODO: implement noteContent
-  String get noteContent => throw UnimplementedError();
-
-  @override
-  // TODO: implement noteCreatedAt
-  DateTime get noteCreatedAt => throw UnimplementedError();
-
-  @override
-  // TODO: implement noteId
-  String get noteId => throw UnimplementedError();
-
-  @override
-  // TODO: implement noteModifiedAt
-  DateTime get noteModifiedAt => throw UnimplementedError();
-
-  @override
-  // TODO: implement noteTitle
-  String get noteTitle => throw UnimplementedError();
 }

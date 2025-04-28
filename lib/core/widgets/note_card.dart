@@ -21,6 +21,7 @@ class NoteCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: borderRadius),
       clipBehavior: Clip.antiAlias,
+      elevation: 3,
       child: InkWell(
         borderRadius: borderRadius,
         onTap: () => Navigator.push(

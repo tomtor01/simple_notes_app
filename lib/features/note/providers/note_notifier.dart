@@ -1,15 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/note_repository_hive.dart';
+import '../data/note_repository.dart';
 import '../models/note.dart';
 
-final notesRepositoryProvider = Provider((ref) => NotesRepositoryHive());
+final notesRepositoryProvider = Provider((ref) => NotesRepository());
 
 final notesProvider = AsyncNotifierProvider<NotesNotifier, List<Note>>(() {
   return NotesNotifier();
 });
 
 class NotesNotifier extends AsyncNotifier<List<Note>> {
-  late final NotesRepositoryHive _repository = ref.read(notesRepositoryProvider);
+  late final NotesRepository _repository = ref.read(notesRepositoryProvider);
 
   @override
   Future<List<Note>> build() async {

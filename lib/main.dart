@@ -1,32 +1,30 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/home/presentation/home_page.dart';
-import 'features/note/models/note.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:simple_notes_app/core/theme/app_theme.dart';
+import 'features/note/presentation/home_page.dart';
+import 'core/theme/theme_provider.dart';
+
+
+final themeProvider = ChangeNotifierProvider<ThemeProvider>((ref) => ThemeProvider());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Hive.initFlutter();
-  Hive.registerAdapter(NoteAdapter());
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TheNoteApp',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: theme.themeMode,
       home: const HomePage(),
     );
   }

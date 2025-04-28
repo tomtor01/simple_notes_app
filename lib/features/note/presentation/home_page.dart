@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:simple_notes_app/features/note/presentation/settings_page.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/note_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../note/models/note.dart';
-import '../../note/presentation/add_note_page.dart';
-import '../../note/presentation/note_page.dart';
-import '../../note/providers/note_notifier.dart';
+import '../models/note.dart';
+import 'add_note_page.dart';
+import 'edit_note_page.dart';
+import '../providers/note_notifier.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -24,6 +25,17 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return AdaptiveScaffold(
       title: 'Notatki',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            );
+          },
+        ),
+      ],
       selectedIndex: _selectedIndex,
       onDestinationSelected: (index) {
         setState(() {

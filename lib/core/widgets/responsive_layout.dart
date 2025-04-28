@@ -9,7 +9,6 @@ enum WindowSizeClass {
 
 // Klasa pomocnicza do określania klasy rozmiaru okna
 class ResponsiveLayout {
-
   static const double _compactMaxWidth = 600;
   static const double _mediumMaxWidth = 840;
   static const double _largeMaxWidth = 1200;
@@ -47,6 +46,7 @@ class ResponsiveLayout {
         return 4;
     }
   }
+
   // Zwraca odpowiednie marginesy w zależności od klasy rozmiaru
   static EdgeInsets getMarginForWindowSize(WindowSizeClass windowSizeClass) {
     switch (windowSizeClass) {
@@ -102,6 +102,7 @@ class AdaptiveScaffold extends StatelessWidget {
   final int? selectedIndex;
   final ValueChanged<int>? onDestinationSelected;
   final FloatingActionButton? floatingActionButton;
+  final List<Widget>? actions;
 
   const AdaptiveScaffold({
     super.key,
@@ -111,6 +112,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.selectedIndex,
     this.onDestinationSelected,
     this.floatingActionButton,
+    this.actions,
   });
 
   @override
@@ -118,39 +120,53 @@ class AdaptiveScaffold extends StatelessWidget {
     final windowSizeClass = ResponsiveLayout.getWindowSizeClass(context);
 
     // Panel nawigacyjny widoczny tylko w trybie rozszerzonym (powyżej 1200px)
-    final showSideNav = windowSizeClass == WindowSizeClass.expanded && navigationDestinations != null;
+    final showSideNav =
+        windowSizeClass == WindowSizeClass.expanded &&
+        navigationDestinations != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: Theme.of(context).colorScheme.primaryContainer),
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        actions: actions,
+      ),
       body: SafeArea(
-        child: showSideNav
-            ? Row(
-                children: [
-                  // Panel boczny
-                  NavigationRail(
-                    selectedIndex: selectedIndex ?? 0,
-                    onDestinationSelected: onDestinationSelected ?? (_) {},
-                    labelType: NavigationRailLabelType.all,
-                    destinations: navigationDestinations!
-                        .map((destination) => NavigationRailDestination(icon: destination.icon, label: Text(destination.label)))
-                        .toList(),
-                  ),
-                  // Separator
-                  const VerticalDivider(thickness: 1, width: 1),
-                  // Główna zawartość
-                  Expanded(child: body),
-                ],
-              )
-            : body,
+        child:
+            showSideNav
+                ? Row(
+                  children: [
+                    // Panel boczny
+                    NavigationRail(
+                      selectedIndex: selectedIndex ?? 0,
+                      onDestinationSelected: onDestinationSelected ?? (_) {},
+                      labelType: NavigationRailLabelType.all,
+                      destinations:
+                          navigationDestinations!
+                              .map(
+                                (destination) => NavigationRailDestination(
+                                  icon: destination.icon,
+                                  label: Text(destination.label),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                    // Separator
+                    const VerticalDivider(thickness: 1, width: 1),
+                    // Główna zawartość
+                    Expanded(child: body),
+                  ],
+                )
+                : body,
       ),
       // Dolny pasek nawigacji widoczny tylko w trybach kompaktowym, średnim i dużym
-      bottomNavigationBar: showSideNav || navigationDestinations == null
-          ? null
-          : NavigationBar(
-              selectedIndex: selectedIndex ?? 0,
-              onDestinationSelected: onDestinationSelected ?? (_) {},
-              destinations: navigationDestinations!,
-            ),
+      bottomNavigationBar:
+          showSideNav || navigationDestinations == null
+              ? null
+              : NavigationBar(
+                selectedIndex: selectedIndex ?? 0,
+                onDestinationSelected: onDestinationSelected ?? (_) {},
+                destinations: navigationDestinations!,
+              ),
       floatingActionButton: floatingActionButton,
     );
   }
