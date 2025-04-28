@@ -14,6 +14,20 @@ class AddNotePage extends ConsumerStatefulWidget {
 class _AddNotePageState extends ConsumerState<AddNotePage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  bool _canSave = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_validate);
+    _contentController.addListener(_validate);
+  }
+
+  void _validate() {
+    setState(() {
+      _canSave = _contentController.text.trim().isNotEmpty;
+    });
+  }
 
   @override
   void dispose() {
@@ -27,20 +41,27 @@ class _AddNotePageState extends ConsumerState<AddNotePage> {
     final now = DateTime.now();
     final note = Note(
       id: const Uuid().v4(),
-      title: _titleController.text,
+      title:
+          _titleController.text.trim().isEmpty
+              ? 'Notatka bez tytułu'
+              : _titleController.text,
       content: _contentController.text,
       createdAt: now,
       modifiedAt: now,
     );
     await repository.addNote(note);
     ref.invalidate(notesProvider);
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nowa notatka')),
+      appBar: AppBar(
+        title: const Text('Nowa notatka'),
+        scrolledUnderElevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,7 +81,7 @@ class _AddNotePageState extends ConsumerState<AddNotePage> {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: _saveNote,
+              onPressed: _canSave ? _saveNote : null,
               child: const Text('Zapisz notatkę'),
             ),
           ],

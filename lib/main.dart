@@ -21,7 +21,7 @@ class MyApp extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'TheNoteApp',
+      title: 'Prosty notatnik',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: theme.themeMode,

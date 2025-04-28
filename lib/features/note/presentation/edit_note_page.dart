@@ -34,21 +34,26 @@ class _NotePageState extends ConsumerState<NotePage> {
     final repository = ref.read(notesRepositoryProvider);
     final updatedNote = Note(
       id: widget.note.id,
-      title: _titleController.text,
+      title:
+          _titleController.text.trim().isEmpty
+              ? 'Notatka bez tytułu'
+              : _titleController.text,
       content: _contentController.text,
       createdAt: widget.note.createdAt,
       modifiedAt: DateTime.now(),
     );
 
     await repository.updateNote(updatedNote);
-    ref.invalidate(notesProvider); // Refreshes notes list in HomePage
+    ref.invalidate(notesProvider); // odświeżenie listy notatek w HomePage
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
   Future<void> _deleteNote() async {
     final repository = ref.read(notesRepositoryProvider);
     await repository.deleteNote(widget.note.id);
-    ref.invalidate(notesProvider); // Refreshes notes list in HomePage
+    ref.invalidate(notesProvider);
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -57,6 +62,7 @@ class _NotePageState extends ConsumerState<NotePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edytuj notatkę"),
+        scrolledUnderElevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
@@ -77,7 +83,7 @@ class _NotePageState extends ConsumerState<NotePage> {
               child: TextField(
                 controller: _contentController,
                 decoration: const InputDecoration(labelText: "Treść"),
-                maxLines: null, // Allow multiline input
+                maxLines: null, // pozwala na multiline
                 keyboardType: TextInputType.multiline,
               ),
             ),

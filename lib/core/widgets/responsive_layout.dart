@@ -129,6 +129,7 @@ class AdaptiveScaffold extends StatelessWidget {
         title: Text(title),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         actions: actions,
+        scrolledUnderElevation: 0,
       ),
       body: SafeArea(
         child:
