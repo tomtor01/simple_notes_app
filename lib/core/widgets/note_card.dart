@@ -5,6 +5,7 @@ class NoteCard extends StatelessWidget {
   final Widget destination;
   final String content;
   final DateTime modified;
+  final VoidCallback? onTap;
 
   const NoteCard({
     super.key,
@@ -12,6 +13,7 @@ class NoteCard extends StatelessWidget {
     required this.destination,
     required this.content,
     required this.modified,
+    this.onTap,
   });
 
   @override
@@ -24,7 +26,7 @@ class NoteCard extends StatelessWidget {
       elevation: 3,
       child: InkWell(
         borderRadius: borderRadius,
-        onTap: () => Navigator.push(
+        onTap: onTap ?? () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => destination),
         ),

@@ -1,12 +1,15 @@
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_notes_app/features/note/presentation/settings_page.dart';
+import 'auth_gate.dart';
 import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/widgets/note_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/note.dart';
+import '../application/providers/note_notifier.dart';
+import '../data/models/note.dart';
 import 'add_note_page.dart';
 import 'edit_note_page.dart';
-import '../providers/note_notifier.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -19,13 +22,64 @@ class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // ładuje notatki przy inicjalizacji
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notesProvider.notifier).loadNotes();
+    });
+
+    // Nasłuchuje zmian w stanie uwierzytelnienia
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      // Odświeża notatki przy zmianie stanu logowania
+      if (mounted) {
+        ref.read(notesProvider.notifier).loadNotes();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final windowSizeClass = ResponsiveLayout.getWindowSizeClass(context);
     final notesState = ref.watch(notesProvider);
+    final isUserLoggedIn = FirebaseAuth.instance.currentUser != null;
 
     return AdaptiveScaffold(
-      title: 'Notatki',
+      title: isUserLoggedIn ? 'Notatki (Cloud)' : 'Notatki (Lokalne)',
       actions: [
+        IconButton(
+          icon: Icon(isUserLoggedIn ? Icons.person : Icons.login),
+          onPressed: () {
+            if (isUserLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ProfileScreen>(
+                  builder: (context) => ProfileScreen(
+                    appBar: AppBar(
+                      title: const Text('Twój profil'),
+                    ),
+                    actions: [
+                      SignedOutAction((context) {
+                        Navigator.of(context).pop();
+                      })
+                    ],
+                  ),
+                ),
+              ).then((_) {
+                ref.read(notesProvider.notifier).loadNotes();
+              });
+            } else {
+              setState(() {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AuthGate(initialShowLoginScreen: true),
+                  ),
+                );
+              });
+            }
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () {
@@ -47,7 +101,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddNotePage()),
-          );
+          ).then((_) {
+            // Odśwież notatki po powrocie z ekranu dodawania
+            ref.read(notesProvider.notifier).loadNotes();
+          });
         },
         icon: const Icon(Icons.add),
         label: const Text('Nowa notatka'),
@@ -57,13 +114,24 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildBody(
-    BuildContext context,
-    WindowSizeClass windowSizeClass,
-    AsyncValue<List<Note>> notesState,
-  ) {
+      BuildContext context,
+      WindowSizeClass windowSizeClass,
+      AsyncValue<List<Note>> notesState,
+      ) {
     return notesState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(child: Text('Błąd: $error')),
+      error: (error, stackTrace) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Błąd: $error'),
+            ElevatedButton(
+              onPressed: () => ref.read(notesProvider.notifier).loadNotes(),
+              child: const Text('Spróbuj ponownie'),
+            ),
+          ],
+        ),
+      ),
       data: (notes) {
         if (notes.isEmpty) {
           return const Center(child: Text('Brak notatek.'));
@@ -71,9 +139,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         return Padding(
           padding: ResponsiveLayout.getMarginForWindowSize(windowSizeClass),
           child: LayoutBuilder(
-            builder:
-                (context, constraints) =>
-                    _buildGridLayout(notes, windowSizeClass),
+            builder: (context, constraints) => _buildGridLayout(notes, windowSizeClass),
           ),
         );
       },
@@ -82,13 +148,13 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildGridLayout(List<Note> notes, WindowSizeClass windowSizeClass) {
     int columns =
-        windowSizeClass == WindowSizeClass.compact
-            ? 1
-            : windowSizeClass == WindowSizeClass.medium
-            ? 2
-            : windowSizeClass == WindowSizeClass.large
-            ? 3
-            : 4;
+    windowSizeClass == WindowSizeClass.compact
+        ? 1
+        : windowSizeClass == WindowSizeClass.medium
+        ? 2
+        : windowSizeClass == WindowSizeClass.large
+        ? 3
+        : 4;
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -108,6 +174,15 @@ class _HomePageState extends ConsumerState<HomePage> {
       content: note.content,
       modified: note.modifiedAt,
       destination: NotePage(note: note),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => NotePage(note: note)),
+        ).then((_) {
+          // Odśwież notatki po powrocie z ekranu edycji
+          ref.read(notesProvider.notifier).loadNotes();
+        });
+      },
     );
   }
 }
